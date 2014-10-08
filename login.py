@@ -6,6 +6,7 @@ import urllib
 import urllib2
 from bs4 import BeautifulSoup
 import base64,cookielib
+import get_data
 
 username = ""
 password = ""
@@ -77,3 +78,9 @@ data = urllib.urlencode(values)
 # getting the initial page
 response = opener.open(url)
 the_page = response.read()
+
+file = open("response.html", "w")
+file.write(the_page)
+file.close()
+
+get_data.main()
