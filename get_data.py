@@ -5,23 +5,25 @@ import json
 import time
 
 # for today's timetable
-def timetable(row):
-    date = row[1].string.replace('Timetable','').strip()
+def timetable(table):
     subs = []
-    if not str(row[2]).find('No Classes Scheduled today!') > 0:
-        for timetable in row[2].findAll('li'):
-            data = {}
-            data['name'] = timetable.find('div',{'class':'first'}).string.strip()
-            x = timetable.find('div',{'class':'second'}).findAll('div',{'class':'right-bottom'})
-            data['room'] = x[1].string.strip()
-            xx = timetable.find('div',{'class':'left'}).findAll('td')
-            data['time'] = xx[0].string
-            data['code'] = xx[1].string
-            data['duration'] = xx[2].string
-            xy = x[0].string.strip().split('-')
-            data['semester'] = xy[0].replace('Semester','').strip()
-            data['section'] = xy[1].replace('Section','').strip()
-            subs.append(data)
+    date = table.findAll('tr')[1].string.replace('Timetable','').strip()
+    tt_subs = table.find('ul',{'id':'accordion1'}).findAll('li')
+    if str(table.findAll('tr')[2]).find('No Classes Scheduled today!') > 0:
+        data = {'subjects':subs,'date':date}
+        return data
+    for sub in tt_subs:
+        sub = sub.find('div',{'class':'sliderslider'})
+        data = {}
+        data['time'] = sub.find('td',{'class':'left-top'}).string.strip()
+        data['code'] = sub.find('td',{'class':'left-middle'}).string.strip()
+        data['duration'] = sub.find('td',{'class':'left-bottom'}).string.strip()
+        data['name'] = sub.find('div',{'class':'first'}).string.strip()
+        x = sub.findAll('div',{'class':'right-bottom'})
+        data['room'] = x[1].string.strip()
+        data['semester'] = int(x[0].string.split('-')[0].replace('Semester','').strip())
+        data['section'] = x[0].string.split('-')[1].replace('Section','').strip()
+        subs.append(data)
     data = {'subjects':subs,'date':date}
     return data
 
@@ -72,14 +74,11 @@ def sis(table):
     return subs
 
 def main(data):
-    bs = BeautifulSoup(data)
+    bs = BeautifulSoup(data,"lxml")
     table = bs.find("td",{'width':'60%','style':'vertical-align:top;padding:0px 5px 0px 5px;border-right:1px dashed black'})
-    # table = bs.find('div',{'id':'left-column'}).find('table',{'width':'980px'}).findAll('tr')[2].find('td',{'style':'vertical-align:top;padding:0px 5px 0px 5px;border-right:1px dashed black'})
-
-    tt = timetable(table.findAll('tr'))
+    tt = timetable(table)
     det = sis(table)
-    final = {'timetable':tt, 'sis':det, 'status':200, 'desc':'success'}
-    
+    final = {'timetable':tt, 'details':det, 'status':200, 'desc':'success'}
     print json.dumps(final,indent = 4)
 
 file = open('response-'+time.strftime("%d_%m_%Y")+'.html', 'r')
