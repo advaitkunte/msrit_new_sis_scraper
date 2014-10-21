@@ -7,7 +7,7 @@ import time
 # for today's timetable
 def timetable(table):
     subs = []
-    date = table.findAll('tr')[1].string.replace('Timetable','').strip()
+    date = table.findAll('tr')[0].findAll('td')[0].findAll('td')[0].string.replace('Timetable','').strip()
     tt_subs = table.find('ul',{'id':'accordion1'}).findAll('li')
     if str(table.findAll('tr')[2]).find('No Classes Scheduled today!') > 0:
         data = {'subjects':subs,'date':date}
